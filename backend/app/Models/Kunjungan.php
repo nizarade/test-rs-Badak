@@ -8,6 +8,12 @@ class Kunjungan extends Model
 {
     protected $table = 'kunjungan';
     protected $fillable = ['no_rm', 'id_dokter', 'tgl', 'no_antrian', 'status'];
+    // Antrian yang masih memakai kuota.
+    public function scopeAktif($query)
+    {
+        return $query->whereIn('status', ['menunggu', 'dipanggil']);
+    }
+
     public function pasien()
     {
         return $this->belongsTo(Pasien::class, 'no_rm', 'no_rm');

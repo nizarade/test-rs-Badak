@@ -24,7 +24,7 @@ class StoreJadwalDokterRequest extends FormRequest
     {
         return [
             'id_dokter'  => 'required|integer|exists:dokter,id',
-            'hari'       => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
+            'hari'       => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
             'jam_mulai'  => 'required|date_format:H:i',
             'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
             'kuota'      => 'required|integer|min:1|max:100',

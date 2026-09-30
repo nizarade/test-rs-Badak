@@ -7,6 +7,7 @@ import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import LayarAntrian from './pages/LayarAntrian';
 
 // Pasien pages
 import AmbilAntrian from './pages/pasien/AmbilAntrian';
@@ -17,6 +18,8 @@ import KelolaPoliklinik from './pages/admin/KelolaPoliklinik';
 import KelolaDokter from './pages/admin/KelolaDokter';
 import KelolaJadwal from './pages/admin/KelolaJadwal';
 import PanggilAntrian from './pages/admin/PanggilAntrian';
+import KelolaPasien from './pages/admin/KelolaPasien';
+import DetailPasien from './pages/admin/DetailPasien';
 
 function App() {
   return (
@@ -28,6 +31,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Dashboard />} />
+          <Route path="/antrian" element={<LayarAntrian />} />
 
           {/* Pasien Only */}
           <Route path="/ambil-antrian" element={
@@ -60,6 +64,16 @@ function App() {
           <Route path="/admin/antrian" element={
             <ProtectedRoute role="admin">
               <PanggilAntrian />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/pasien" element={
+            <ProtectedRoute role="admin">
+              <KelolaPasien />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/pasien/:noRm" element={
+            <ProtectedRoute role="admin">
+              <DetailPasien />
             </ProtectedRoute>
           } />
         </Routes>

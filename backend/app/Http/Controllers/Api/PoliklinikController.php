@@ -33,10 +33,8 @@ class PoliklinikController extends Controller
         $poliklinik = Poliklinik::findOrFail($kode);
 
         $validated = $request->validate([
-            'kode' => 'sometimes|string|max:20|unique:poliklinik,kode,' . $kode . ',kode',
             'nama' => 'sometimes|string|max:255',
         ], [
-            'kode.unique' => 'Kode poliklinik sudah digunakan.',
             'nama.max'    => 'Nama maksimal 255 karakter.',
         ]);
 
@@ -51,6 +49,13 @@ class PoliklinikController extends Controller
     public function destroy(string $kode)
     {
         $poliklinik = Poliklinik::findOrFail($kode);
+
+        if ($poliklinik->dokter()->exists()) {
+            return response()->json([
+                'message' => 'Poliklinik masih memiliki dokter. Pindahkan atau hapus dokternya terlebih dahulu.',
+            ], 409);
+        }
+
         $poliklinik->delete();
 
         return response()->json([

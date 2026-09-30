@@ -23,7 +23,6 @@ class StoreKunjunganRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'no_rm'     => 'required|string|exists:pasien,no_rm',
             'id_dokter' => 'required|integer|exists:dokter,id',
             'tgl'       => 'required|date|after_or_equal:today',
         ];
@@ -32,8 +31,6 @@ class StoreKunjunganRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'no_rm.required'        => 'No. Rekam Medis wajib diisi.',
-            'no_rm.exists'          => 'No. Rekam Medis tidak ditemukan.',
             'id_dokter.required'    => 'Dokter wajib dipilih.',
             'id_dokter.exists'      => 'Dokter tidak ditemukan.',
             'tgl.required'          => 'Tanggal kunjungan wajib diisi.',
