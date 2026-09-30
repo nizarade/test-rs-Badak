@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Pasien extends Model
 {
     protected $table = 'pasien';
-    protected $primaryKey = 'np_rm';
-    public $incermenting = false;
+    protected $primaryKey = 'no_rm';
+    public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = ['no_rm', 'user_id', 'nama', 'tgl_lahir', 'alamat', 'no_hp'];

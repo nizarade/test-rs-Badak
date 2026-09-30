@@ -12,7 +12,7 @@ class StoreDokterRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,19 @@ class StoreDokterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'nama'      => 'required|string|max:255',
+            'spesialis' => 'required|string|max:255',
+            'id_poli'   => 'required|string|exists:poliklinik,kode',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'nama.required'      => 'Nama dokter wajib diisi.',
+            'spesialis.required' => 'Spesialisasi wajib diisi.',
+            'id_poli.required'   => 'Poliklinik wajib dipilih.',
+            'id_poli.exists'     => 'Kode poliklinik tidak ditemukan.',
         ];
     }
 }

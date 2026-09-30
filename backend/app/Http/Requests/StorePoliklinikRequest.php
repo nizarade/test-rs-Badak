@@ -12,7 +12,7 @@ class StorePoliklinikRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,17 @@ class StorePoliklinikRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'kode' => 'required|string|max:20|unique:poliklinik,kode',
+            'nama' => 'required|string|max:255',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'kode.required' => 'Kode poliklinik wajib diisi.',
+            'kode.unique'   => 'Kode poliklinik sudah digunakan.',
+            'nama.required' => 'Nama poliklinik wajib diisi.',
         ];
     }
 }

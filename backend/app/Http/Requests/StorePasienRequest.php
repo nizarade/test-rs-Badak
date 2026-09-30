@@ -23,7 +23,23 @@ class StorePasienRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'nama'      => 'required|string|max:255',
+            'tgl_lahir' => 'required|date|before:today',
+            'alamat'    => 'required|string',
+            'no_hp'     => 'required|string|max:15',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'nama.required'      => 'Nama pasien wajib diisi.',
+            'nama.max'           => 'Nama maksimal 255 karakter.',
+            'tgl_lahir.required' => 'Tanggal lahir wajib diisi.',
+            'tgl_lahir.before'   => 'Tanggal lahir harus sebelum hari ini.',
+            'alamat.required'    => 'Alamat wajib diisi.',
+            'no_hp.required'     => 'Nomor HP wajib diisi.',
+            'no_hp.max'          => 'Nomor HP maksimal 15 karakter.',
         ];
     }
 }

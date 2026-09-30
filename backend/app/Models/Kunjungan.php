@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Kunjungan extends Model
 {
     protected $table = 'kunjungan';
-    //testing koneksidadw
     protected $fillable = ['no_rm', 'id_dokter', 'tgl', 'no_antrian', 'status'];
     public function pasien()
     {

@@ -6,21 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Poliklinik extends Model
 {
-    protected $table = 'dokter';
-    protected $fillable = ['nama', 'spesialis', 'id_poli'];
+    protected $table = 'poliklinik';
+    protected $primaryKey = 'kode';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
-    public function poliklinik()
-    {
-        return $this->belongsTo(Poliklinik::class, 'id_poli', 'kode');
-    }
+    protected $fillable = ['kode', 'nama'];
 
-    public function jadwal()
+    public function dokter()
     {
-        return $this->hasMany(JadwalDokter::class, 'id_dokter');
-    }
-
-    public function kunjungan()
-    {
-        return $this->hasMany(Kunjungan::class, 'id_dokter');
+        return $this->hasMany(Dokter::class, 'id_poli', 'kode');
     }
 }

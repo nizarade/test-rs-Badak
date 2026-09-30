@@ -19,7 +19,7 @@ class AuthController extends Controller
             'password'  => ['required', 'confirmed', Password::min(8)],
             'tgl_lahir' => 'required|date|before:today',
             'alamat'    => 'required|string|max:500',
-            'no_hp'     => 'required|string',
+            'no_hp'     => 'required|string|max:15',
         ], [
             'name.required'      => 'Nama wajib diisi.',
             'email.required'     => 'Email wajib diisi.',
@@ -32,6 +32,7 @@ class AuthController extends Controller
             'tgl_lahir.before'   => 'Tanggal lahir harus sebelum hari ini.',
             'alamat.required'    => 'Alamat wajib diisi.',
             'no_hp.required'     => 'Nomor HP wajib diisi.',
+            'no_hp.max'          => 'Nomor HP maksimal 15 karakter.',
         ]);
 
         $user = User::create([
@@ -41,9 +42,7 @@ class AuthController extends Controller
             'role'     => 'pasien',
         ]);
 
-        $lastPasien = Pasien::orderBy('no_rm', 'desc')->first();
-        $lastNumber = $lastPasien ? intval(substr($lastPasien->no_rm, 3)) : 0;
-        $newNoRm = 'RM-' . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        $newNoRm = 'RM-' . str_pad($user->id, 5, '0', STR_PAD_LEFT);
 
         Pasien::create([
             'no_rm'     => $newNoRm,
