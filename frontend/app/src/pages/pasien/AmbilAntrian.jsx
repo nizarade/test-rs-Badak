@@ -11,7 +11,9 @@ function AmbilAntrian() {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        api.get('/dokter').then(res => setDokterList(res.data)).catch(() => {});
+        api.get('/dokter')
+            .then(res => setDokterList(res.data))
+            .catch(err => setError(err.response?.data?.message || 'Gagal memuat daftar dokter.'));
     }, []);
 
     const handleSubmit = async (e) => {
@@ -19,15 +21,13 @@ function AmbilAntrian() {
         setError('');
         setResult(null);
 
-        const noRm = user?.pasien?.no_rm;
-        if (!noRm) {
+        if (!user?.pasien?.no_rm) {
             setError('Data No. Rekam Medis pasien tidak ditemukan.');
             return;
         }
 
         try {
             const res = await api.post('/kunjungan', {
-                no_rm: noRm,
                 id_dokter: idDokter,
                 tgl: tgl
             });
@@ -61,6 +61,7 @@ function AmbilAntrian() {
                         {dokterList.map(d => (
                             <option key={d.id} value={d.id}>
                                 {d.nama} ({d.spesialis}) - Poli {d.poliklinik?.nama || d.id_poli}
+                                {d.jadwal?.length > 0 && ` | ${d.jadwal.map(j => `${j.hari} ${j.jam_mulai.slice(0, 5)}-${j.jam_selesai.slice(0, 5)}`).join(', ')}`}
                             </option>
                         ))}
                     </select>
@@ -68,7 +69,7 @@ function AmbilAntrian() {
 
                 <div className="mb-3">
                     <label className="block font-bold mb-1 text-sm">Tanggal Kunjungan</label>
-                    <input className="w-full border border-gray-300 rounded px-2 py-1" type="date" value={tgl} onChange={e => setTgl(e.target.value)} required />
+                    <input className="w-full border border-gray-300 rounded px-2 py-1" type="date" min={new Date().toLocaleDateString("en-CA")} value={tgl} onChange={e => setTgl(e.target.value)} required />
                 </div>
 
                 <button type="submit" className="px-3 py-1 rounded text-white bg-teal-600">Ambil Antrian</button>

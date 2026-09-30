@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDokterRequest;
 use App\Models\Dokter;
+use App\Models\Kunjungan;
 use Illuminate\Http\Request;
 
 class DokterController extends Controller
@@ -64,6 +65,13 @@ class DokterController extends Controller
     public function destroy(int $id)
     {
         $dokter = Dokter::findOrFail($id);
+
+        if (Kunjungan::where('id_dokter', $id)->exists()) {
+            return response()->json([
+                'message' => 'Dokter memiliki riwayat kunjungan dan tidak bisa dihapus.',
+            ], 409);
+        }
+
         $dokter->delete();
 
         return response()->json([

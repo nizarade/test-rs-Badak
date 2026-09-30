@@ -37,9 +37,15 @@ export function AuthProvider({ children }) {
     };
 
     const logout = async () => {
-        await api.post('/logout');
-        localStorage.removeItem('token');
-        setUser(null);
+        try {
+            await api.post('/logout');
+        } catch {
+            // Token bisa saja sudah kedaluwarsa; sesi lokal tetap harus dibersihkan.
+        } finally {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+        }
     };
 
     return (

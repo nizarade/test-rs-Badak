@@ -10,8 +10,9 @@ function KelolaDokter() {
     const [error, setError] = useState('');
 
     const fetchData = () => {
-        api.get('/dokter').then(res => setDokterList(res.data)).catch(() => {});
-        api.get('/poliklinik').then(res => setPoliList(res.data)).catch(() => {});
+        const onError = err => setError(err.response?.data?.message || 'Gagal memuat data.');
+        api.get('/dokter').then(res => setDokterList(res.data)).catch(onError);
+        api.get('/poliklinik').then(res => setPoliList(res.data)).catch(onError);
     };
 
     useEffect(() => {
@@ -35,12 +36,13 @@ function KelolaDokter() {
 
     const handleDelete = async (id) => {
         if (!confirm('Hapus data dokter ini?')) return;
+        setError('');
 
         try {
             await api.delete(`/dokter/${id}`);
             fetchData();
         } catch (err) {
-            alert(err.response?.data?.message || 'Gagal menghapus dokter.');
+            setError(err.response?.data?.message || 'Gagal menghapus dokter.');
         }
     };
 

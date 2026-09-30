@@ -4,11 +4,12 @@ import api from '../../api/axios';
 function RiwayatKunjungan() {
     const [riwayat, setRiwayat] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     useEffect(() => {
         api.get('/kunjungan/saya')
             .then(res => setRiwayat(res.data))
-            .catch(() => {})
+            .catch(err => setError(err.response?.data?.message || 'Gagal memuat riwayat kunjungan.'))
             .finally(() => setLoading(false));
     }, []);
 
@@ -17,7 +18,8 @@ function RiwayatKunjungan() {
     return (
         <div className="max-w-4xl mx-auto px-5 pb-10">
             <h2 className="text-xl font-bold my-4">Riwayat Kunjungan Saya</h2>
-            {riwayat.length === 0 ? (
+            {error && <div className="text-red-600 mb-3">{error}</div>}
+            {!error && riwayat.length === 0 ? (
                 <p>Belum ada riwayat kunjungan.</p>
             ) : (
                 <table className="w-full bg-white border-collapse">

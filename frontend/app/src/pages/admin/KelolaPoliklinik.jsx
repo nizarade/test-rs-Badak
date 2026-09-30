@@ -8,7 +8,9 @@ function KelolaPoliklinik() {
     const [error, setError] = useState('');
 
     const fetchList = () => {
-        api.get('/poliklinik').then(res => setList(res.data)).catch(() => {});
+        api.get('/poliklinik')
+            .then(res => setList(res.data))
+            .catch(err => setError(err.response?.data?.message || 'Gagal memuat data poliklinik.'));
     };
 
     useEffect(() => {
@@ -31,12 +33,13 @@ function KelolaPoliklinik() {
 
     const handleDelete = async (kodeTarget) => {
         if (!confirm(`Hapus poliklinik ${kodeTarget}?`)) return;
+        setError('');
 
         try {
             await api.delete(`/poliklinik/${kodeTarget}`);
             fetchList();
         } catch (err) {
-            alert(err.response?.data?.message || 'Gagal menghapus poliklinik.');
+            setError(err.response?.data?.message || 'Gagal menghapus poliklinik.');
         }
     };
 

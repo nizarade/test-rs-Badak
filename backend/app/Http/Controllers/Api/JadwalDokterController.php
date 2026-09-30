@@ -52,7 +52,7 @@ class JadwalDokterController extends Controller
 
         $validated = $request->validate([
             'id_dokter'   => 'sometimes|integer|exists:dokter,id',
-            'hari'        => 'sometimes|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
+            'hari'        => 'sometimes|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
             'jam_mulai'   => 'sometimes|date_format:H:i',
             'jam_selesai' => 'sometimes|date_format:H:i|after:jam_mulai',
             'kuota'       => 'sometimes|integer|min:1|max:100',

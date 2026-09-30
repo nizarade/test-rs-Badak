@@ -2,21 +2,30 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class AdminSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        \App\Models\User::create([
-            'name'     => 'Administrator',
-            'email'    => 'admin@poliklinik.com',
-            'password' => 'admin123',
-            'role'     => 'admin',
-        ]);
+        // Set ADMIN_PASSWORD di .env. Tanpa itu: 'admin123' hanya di lingkungan local,
+        // selain itu dibuat acak dan ditampilkan sekali di console.
+        $password = env('ADMIN_PASSWORD');
+
+        if (!$password) {
+            if (app()->isLocal()) {
+                $password = 'admin123';
+            } else {
+                $password = Str::random(16);
+                $this->command?->warn("Password admin dibuat acak: {$password}");
+            }
+        }
+
+        User::updateOrCreate(
+            ['email' => 'admin@poliklinik.com'],
+            ['name' => 'Administrator', 'password' => $password, 'role' => 'admin'],
+        );
     }
 }

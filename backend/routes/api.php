@@ -10,8 +10,8 @@ use App\Http\Controllers\Api\PoliklinikController;
 use Illuminate\Support\Facades\Route;
 
 // ── Public Routes ──────────────────────────────
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
 Route::get('/poliklinik', [PoliklinikController::class, 'index']);
 Route::get('/dokter', [DokterController::class, 'index']);

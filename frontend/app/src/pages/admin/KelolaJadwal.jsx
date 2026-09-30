@@ -14,8 +14,9 @@ function KelolaJadwal() {
     const [error, setError] = useState('');
 
     const fetchData = () => {
-        api.get('/jadwal-dokter').then(res => setJadwalList(res.data)).catch(() => {});
-        api.get('/dokter').then(res => setDokterList(res.data)).catch(() => {});
+        const onError = err => setError(err.response?.data?.message || 'Gagal memuat data.');
+        api.get('/jadwal-dokter').then(res => setJadwalList(res.data)).catch(onError);
+        api.get('/dokter').then(res => setDokterList(res.data)).catch(onError);
     };
 
     useEffect(() => {
@@ -43,12 +44,13 @@ function KelolaJadwal() {
 
     const handleDelete = async (id) => {
         if (!confirm('Hapus jadwal ini?')) return;
+        setError('');
 
         try {
             await api.delete(`/jadwal-dokter/${id}`);
             fetchData();
         } catch (err) {
-            alert(err.response?.data?.message || 'Gagal menghapus jadwal.');
+            setError(err.response?.data?.message || 'Gagal menghapus jadwal.');
         }
     };
 
@@ -79,6 +81,7 @@ function KelolaJadwal() {
                         <option value="Kamis">Kamis</option>
                         <option value="Jumat">Jumat</option>
                         <option value="Sabtu">Sabtu</option>
+                        <option value="Minggu">Minggu</option>
                     </select>
                 </div>
 
