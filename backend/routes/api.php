@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AntrianPublikController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DokterController;
@@ -16,7 +17,9 @@ Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,
 Route::get('/poliklinik', [PoliklinikController::class, 'index']);
 Route::get('/dokter', [DokterController::class, 'index']);
 Route::get('/dokter/{id}', [DokterController::class, 'show']);
+Route::get('/dokter/{id}/kuota', [DokterController::class, 'kuota']);
 Route::get('/jadwal-dokter', [JadwalDokterController::class, 'index']);
+Route::get('/antrian/hari-ini', [AntrianPublikController::class, 'index']);
 
 // ── Protected Routes (Authenticated) ───────────
 Route::middleware('auth:sanctum')->group(function () {
@@ -27,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:pasien')->group(function () {
         Route::post('/kunjungan', [KunjunganController::class, 'store']);
         Route::get('/kunjungan/saya', [KunjunganController::class, 'riwayatSaya']);
+        Route::patch('/kunjungan/{id}/batal-saya', [KunjunganController::class, 'batalSaya']);
     });
 
     // Admin Only

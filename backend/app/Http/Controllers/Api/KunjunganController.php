@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreKunjunganRequest;
 use App\Models\JadwalDokter;
 use App\Models\Kunjungan;
-use Carbon\Carbon;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -54,13 +53,10 @@ class KunjunganController extends Controller
 
         $validated['no_rm'] = $pasien->no_rm;
 
-        $hariList = [1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu', 4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu', 7 => 'Minggu'];
-        $hariIndex = Carbon::parse($validated['tgl'])->dayOfWeekIso;
-        $namaHari = $hariList[$hariIndex] ?? '';
+        $namaHari = JadwalDokter::namaHari($validated['tgl']);
 
         try {
             $kunjungan = DB::transaction(function () use ($validated, $namaHari) {
-                // Lock baris jadwal agar booking bersamaan untuk dokter yang sama diproses berurutan.
                 $jadwal = JadwalDokter::where('id_dokter', $validated['id_dokter'])
                     ->where('hari', $namaHari)
                     ->lockForUpdate()
@@ -72,7 +68,7 @@ class KunjunganController extends Controller
 
                 $terisi = Kunjungan::where('id_dokter', $validated['id_dokter'])
                     ->where('tgl', $validated['tgl'])
-                    ->whereIn('status', ['menunggu', 'dipanggil'])
+                    ->aktif()
                     ->count();
 
                 if ($terisi >= $jadwal->kuota) {
@@ -82,7 +78,7 @@ class KunjunganController extends Controller
                 $sudahAda = Kunjungan::where('no_rm', $validated['no_rm'])
                     ->where('id_dokter', $validated['id_dokter'])
                     ->where('tgl', $validated['tgl'])
-                    ->whereIn('status', ['menunggu', 'dipanggil'])
+                    ->aktif()
                     ->exists();
 
                 if ($sudahAda) {
@@ -112,6 +108,25 @@ class KunjunganController extends Controller
             'no_antrian' => $kunjungan->no_antrian,
             'data'       => $kunjungan->load(['pasien', 'dokter.poliklinik']),
         ], 201);
+    }
+
+    public function batalSaya(Request $request, $id)
+    {
+        $pasien = $request->user()->pasien;
+
+        if (!$pasien) {
+            return response()->json(['message' => 'Data pasien tidak ditemukan.'], 404);
+        }
+
+        $kunjungan = Kunjungan::where('no_rm', $pasien->no_rm)->findOrFail($id);
+
+        if ($kunjungan->status !== 'menunggu') {
+            return response()->json(['message' => 'Hanya antrian berstatus "menunggu" yang bisa dibatalkan.'], 422);
+        }
+
+        $kunjungan->update(['status' => 'batal']);
+
+        return response()->json(['message' => 'Antrian berhasil dibatalkan.', 'data' => $kunjungan]);
     }
 
     public function panggil($id)

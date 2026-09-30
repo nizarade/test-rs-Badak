@@ -17,12 +17,13 @@ function Navbar() {
         <nav className="flex items-center gap-5 px-5 py-3 bg-teal-600 text-white mb-5">
             <strong className="text-lg">Antrian Poliklinik</strong>
             <NavLink to="/" end className={linkClass}>Beranda</NavLink>
+            <NavLink to="/antrian" className={linkClass}>Layar Antrian</NavLink>
 
             {!user && (
-                <>
+                <div className="ml-auto flex items-center gap-5">
                     <NavLink to="/login" className={linkClass}>Login</NavLink>
                     <NavLink to="/register" className={linkClass}>Register Pasien</NavLink>
-                </>
+                </div>
             )}
 
             {user && user.role === 'pasien' && (
@@ -35,6 +36,7 @@ function Navbar() {
             {user && user.role === 'admin' && (
                 <>
                     <NavLink to="/admin/antrian" className={linkClass}>Kelola Antrian</NavLink>
+                    <NavLink to="/admin/pasien" className={linkClass}>Pasien</NavLink>
                     <NavLink to="/admin/poliklinik" className={linkClass}>Poliklinik</NavLink>
                     <NavLink to="/admin/dokter" className={linkClass}>Dokter</NavLink>
                     <NavLink to="/admin/jadwal" className={linkClass}>Jadwal</NavLink>

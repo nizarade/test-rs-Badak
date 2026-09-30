@@ -14,7 +14,10 @@ class PasienController extends Controller
 
         if ($request->filled('cari')) {
             $cari = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower($request->query('cari')));
-            $query->whereRaw("LOWER(nama) LIKE ? ESCAPE '!'", ['%' . $cari . '%']);
+            $query->where(function ($q) use ($cari) {
+                $q->whereRaw("LOWER(nama) LIKE ? ESCAPE '!'", ['%' . $cari . '%'])
+                    ->orWhereRaw("LOWER(no_rm) LIKE ? ESCAPE '!'", ['%' . $cari . '%']);
+            });
         }
 
         $pasien = $query->orderBy('created_at', 'desc')->paginate(15);

@@ -16,7 +16,7 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// INTERCEPTOR — handle error 401 (token expired/invalid)
+// Token kedaluwarsa atau tidak valid: hapus sesi dan kembali ke login.
 api.interceptors.response.use(
     (response) => response,
     (error) => {

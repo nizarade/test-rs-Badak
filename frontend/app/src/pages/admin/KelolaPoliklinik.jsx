@@ -1,88 +1,123 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import api from '../../api/axios';
+import useData from '../../hooks/useData';
+import useAksi from '../../hooks/useAksi';
+import Pesan from '../../components/Pesan';
+import Tombol from '../../components/Tombol';
+import { Isian } from '../../components/Kolom';
+import { Tabel, Td, AksiBaris } from '../../components/Tabel';
+import { isian } from '../../components/gaya';
+
+const kosong = { kode: '', nama: '' };
 
 function KelolaPoliklinik() {
-    const [list, setList] = useState([]);
-    const [kode, setKode] = useState('');
-    const [nama, setNama] = useState('');
-    const [error, setError] = useState('');
+    const { data: daftar, error: errorMuat, muat } = useData('/poliklinik');
+    const { pesan, error, bekerja, bersih, jalankan } = useAksi();
+    const [form, setForm] = useState(kosong);
+    const [edit, setEdit] = useState(null);
 
-    const fetchList = () => {
-        api.get('/poliklinik')
-            .then(res => setList(res.data))
-            .catch(err => setError(err.response?.data?.message || 'Gagal memuat data poliklinik.'));
-    };
-
-    useEffect(() => {
-        fetchList();
-    }, []);
-
-    const handleAdd = async (e) => {
+    const tambah = async (e) => {
         e.preventDefault();
-        setError('');
-
-        try {
-            await api.post('/poliklinik', { kode, nama });
-            setKode('');
-            setNama('');
-            fetchList();
-        } catch (err) {
-            setError(err.response?.data?.message || 'Gagal menambah poliklinik.');
+        const nama = form.nama.trim();
+        const ok = await jalankan(() => api.post('/poliklinik', { ...form, nama }), `Poliklinik ${nama} berhasil ditambahkan.`, 'Gagal menambah poliklinik.');
+        if (ok) {
+            setForm(kosong);
+            muat();
         }
     };
 
-    const handleDelete = async (kodeTarget) => {
-        if (!confirm(`Hapus poliklinik ${kodeTarget}?`)) return;
-        setError('');
-
-        try {
-            await api.delete(`/poliklinik/${kodeTarget}`);
-            fetchList();
-        } catch (err) {
-            setError(err.response?.data?.message || 'Gagal menghapus poliklinik.');
+    const simpan = async (e) => {
+        e.preventDefault();
+        const nama = edit.nama.trim();
+        const ok = await jalankan(() => api.put(`/poliklinik/${edit.kode}`, { nama }), `Nama poliklinik ${edit.kode} diubah menjadi ${nama}.`, 'Gagal menyimpan perubahan.');
+        if (ok) {
+            setEdit(null);
+            muat();
         }
     };
+
+    const hapus = async (p) => {
+        if (!confirm(`Hapus poliklinik ${p.nama}? Tindakan ini tidak bisa dibatalkan.`)) return;
+        if (await jalankan(() => api.delete(`/poliklinik/${p.kode}`), `Poliklinik ${p.nama} berhasil dihapus.`, 'Gagal menghapus poliklinik.')) muat();
+    };
+
+    const mulaiUbah = (p) => {
+        bersih();
+        setEdit({ kode: p.kode, nama: p.nama });
+    };
+
+    const adaYangTerkunci = daftar?.some(p => p.dokter?.length > 0);
 
     return (
-        <div className="max-w-4xl mx-auto px-5 pb-10">
+        <div className="max-w-4xl mx-auto px-4 pb-10">
             <h2 className="text-xl font-bold my-4">Kelola Poliklinik</h2>
+            <p className="text-gray-700 mb-4">Poliklinik adalah unit layanan tempat dokter praktek, misalnya Poli Umum atau Poli Gigi.</p>
 
-            {error && <div className="text-red-600 mb-3">{error}</div>}
+            <Pesan error={error || errorMuat} sukses={pesan} />
 
-            <form className="bg-white p-4 border border-gray-300 rounded max-w-md mb-5" onSubmit={handleAdd}>
-                <h3 className="text-lg font-bold my-2">Tambah Poliklinik Baru</h3>
-                <div className="mb-3">
-                    <label className="block font-bold mb-1 text-sm">Kode Poliklinik (Contoh: POLI-001)</label>
-                    <input className="w-full border border-gray-300 rounded px-2 py-1" type="text" value={kode} onChange={e => setKode(e.target.value)} required />
+            <form className="bg-white p-4 border border-gray-300 rounded mb-6" onSubmit={tambah}>
+                <h3 className="text-lg font-bold mb-3">Tambah poliklinik baru</h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <Isian id="nama" label="Nama poliklinik" placeholder="Contoh: Poli Gigi" value={form.nama} onChange={e => setForm({ ...form, nama: e.target.value })} maxLength={255} required />
+                    <Isian
+                        id="kode"
+                        label="Kode singkat"
+                        placeholder="Contoh: GIGI"
+                        bantu="Huruf besar atau angka, tanpa spasi. Tidak bisa diubah setelah disimpan."
+                        value={form.kode}
+                        onChange={e => setForm({ ...form, kode: e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, '') })}
+                        maxLength={20}
+                        required
+                    />
                 </div>
-                <div className="mb-3">
-                    <label className="block font-bold mb-1 text-sm">Nama Poliklinik</label>
-                    <input className="w-full border border-gray-300 rounded px-2 py-1" type="text" value={nama} onChange={e => setNama(e.target.value)} required />
-                </div>
-                <button type="submit" className="px-3 py-1 rounded text-white bg-teal-600">Tambah</button>
+                <Tombol type="submit" className="mt-4" disabled={bekerja}>Tambah Poliklinik</Tombol>
             </form>
 
-            <h3 className="text-lg font-bold my-2">Daftar Poliklinik</h3>
-            <table className="w-full bg-white border-collapse">
-                <thead>
-                    <tr>
-                        <th className="border border-gray-300 p-2 text-left bg-gray-100">Kode</th>
-                        <th className="border border-gray-300 p-2 text-left bg-gray-100">Nama Poliklinik</th>
-                        <th className="border border-gray-300 p-2 text-left bg-gray-100">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {list.map(item => (
-                        <tr key={item.kode}>
-                            <td className="border border-gray-300 p-2">{item.kode}</td>
-                            <td className="border border-gray-300 p-2">{item.nama}</td>
-                            <td className="border border-gray-300 p-2">
-                                <button className="px-3 py-1 rounded text-white bg-red-600" onClick={() => handleDelete(item.kode)}>Hapus</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <h3 className="text-lg font-bold mb-2">Daftar poliklinik{daftar ? ` (${daftar.length})` : ''}</h3>
+
+            {daftar === null && <p>Memuat data poliklinik...</p>}
+            {daftar?.length === 0 && <p className="text-gray-700">Belum ada poliklinik.</p>}
+
+            {daftar?.length > 0 && (
+                <>
+                    <Tabel judul="Daftar poliklinik" kolom={['Nama', 'Kode', 'Dokter', 'Aksi']} lebar="min-w-[560px]">
+                        {daftar.map(p => {
+                            const diedit = edit?.kode === p.kode;
+                            const jumlahDokter = p.dokter?.length ?? 0;
+                            return (
+                                <tr key={p.kode}>
+                                    <Td className="font-bold">
+                                        {diedit ? (
+                                            <form id="form-edit" onSubmit={simpan}>
+                                                <input className={isian} aria-label="Nama baru" value={edit.nama} onChange={e => setEdit({ ...edit, nama: e.target.value })} onKeyDown={e => e.key === 'Escape' && setEdit(null)} maxLength={255} required autoFocus />
+                                            </form>
+                                        ) : p.nama}
+                                    </Td>
+                                    <Td>{p.kode}</Td>
+                                    <Td>{jumlahDokter ? `${jumlahDokter} dokter` : '-'}</Td>
+                                    <Td>
+                                        <AksiBaris
+                                            diedit={diedit}
+                                            formId="form-edit"
+                                            bekerja={bekerja}
+                                            bolehSimpan={edit?.nama.trim() !== ''}
+                                            hapusNonaktif={jumlahDokter > 0}
+                                            onUbah={() => mulaiUbah(p)}
+                                            onHapus={() => hapus(p)}
+                                            onBatal={() => setEdit(null)}
+                                        />
+                                    </Td>
+                                </tr>
+                            );
+                        })}
+                    </Tabel>
+                    {adaYangTerkunci && (
+                        <p className="text-sm text-gray-700 mt-2">
+                            Poliklinik yang masih punya dokter tidak bisa dihapus. Pindahkan atau hapus dokternya dulu di halaman Dokter.
+                        </p>
+                    )}
+                </>
+            )}
         </div>
     );
 }
